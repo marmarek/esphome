@@ -15,6 +15,7 @@ class TuyaCover : public cover::Cover, public Component {
   void set_tuya_parent(Tuya *parent) { this->parent_ = parent; }
   void set_min_value(uint32_t min_value) { min_value_ = min_value; }
   void set_max_value(uint32_t max_value) { max_value_ = max_value; }
+  void set_invert_position(bool invert_position) { invert_position_ = invert_position; }
 
  protected:
   void control(const cover::CoverCall &call) override;
@@ -24,6 +25,7 @@ class TuyaCover : public cover::Cover, public Component {
   optional<uint8_t> position_id_{};
   uint32_t min_value_ = 0;
   uint32_t max_value_ = 100;
+  bool invert_position_ = false;
 };
 
 }  // namespace tuya

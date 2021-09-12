@@ -9,7 +9,10 @@ static const char *const TAG = "tuya.cover";
 void TuyaCover::setup() {
   if (this->position_id_.has_value()) {
     this->parent_->register_listener(*this->position_id_, [this](const TuyaDatapoint &datapoint) {
-      this->position = float(datapoint.value_uint) / this->max_value_;
+      auto pos = float(datapoint.value_uint) / this->max_value_;
+      if (this->invert_position_)
+        pos = 1.0f - pos;
+      this->position = pos;
       this->publish_state();
     });
   }
@@ -17,13 +20,18 @@ void TuyaCover::setup() {
 
 void TuyaCover::control(const cover::CoverCall &call) {
   if (call.get_stop()) {
-    auto position_int = static_cast<uint32_t>(this->position * this->max_value_);
+    auto pos = this->position;
+    if (this->invert_position_)
+      pos = 1.0f - pos;
+    auto position_int = static_cast<uint32_t>(pos * this->max_value_);
     position_int = std::max(position_int, this->min_value_);
 
     parent_->set_integer_datapoint_value(*this->position_id_, position_int);
   }
   if (call.get_position().has_value()) {
     auto pos = *call.get_position();
+    if (this->invert_position_)
+      pos = 1.0f - pos;
     auto position_int = static_cast<uint32_t>(pos * this->max_value_);
     position_int = std::max(position_int, this->min_value_);
 
